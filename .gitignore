@@ -1,0 +1,27 @@
+# Build outputs
+target/
+*.jar
+*.war
+*.class
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+
+# Local-only notes (do not publish)
+local/
+*.local.md
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Gradle (nếu sau này dùng)
+.gradle/
+build/
