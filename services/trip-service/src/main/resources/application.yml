@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: trip-service
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:5432/uberpoc
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:secret}
+  sql:
+    init:
+      mode: always       # chạy schema.sql khi start (dev only)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:localhost}:9092
+    consumer:
+      group-id: trip-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.uberpoc.*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.uberpoc.trip.event.RideMatchedEvent
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 30000
+        request.timeout.ms: 10000
+        retry.backoff.ms: 500
+
+server:
+  port: 8083
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+app:
+  redis:
+    trip-state-ttl-seconds: 3600   # cache trip state 1h

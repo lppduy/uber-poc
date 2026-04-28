@@ -1,6 +1,6 @@
 # Uber POC
 
-A ride-hailing system POC inspired by Uber/Grab, built with Java + Spring Boot. Focuses on real-time location tracking, driver matching, and trip lifecycle management.
+Ride-hailing backend POC. Java, Spring Boot, Redis GEO, Kafka, WebFlux.
 
 ## Tech Stack
 
