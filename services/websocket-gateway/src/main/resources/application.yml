@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: websocket-gateway
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:localhost}:9092
+    consumer:
+      group-id: websocket-gateway
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.uberpoc.*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.uberpoc.gateway.event.TripStatusChangedEvent
+
+server:
+  port: 8084
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always

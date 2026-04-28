@@ -90,6 +90,21 @@ services:
         limits:
           memory: 64m
 
+  websocket-gateway:
+    build:
+      context: ../services/websocket-gateway
+      dockerfile: Dockerfile
+    container_name: uber-websocket-gateway
+    ports:
+      - "8084:8084"
+    environment:
+      KAFKA_HOST: kafka
+    depends_on: [kafka]
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+
   grafana:
     image: grafana/grafana:latest
     container_name: uber-grafana
