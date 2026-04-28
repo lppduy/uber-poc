@@ -1,6 +1,6 @@
 # Uber POC
 
-Ride-hailing backend POC — event-driven microservices with real-time push.
+Ride-hailing backend POC. Java, Spring Boot, Redis GEO, Kafka, WebFlux.
 
 ## Tech Stack
 
