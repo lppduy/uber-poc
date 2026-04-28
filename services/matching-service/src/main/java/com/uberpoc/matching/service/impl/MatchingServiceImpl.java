@@ -8,6 +8,7 @@ import com.uberpoc.matching.event.RideMatchedEvent;
 import com.uberpoc.matching.exception.NoDriverAvailableException;
 import com.uberpoc.matching.exception.RideNotFoundException;
 import com.uberpoc.matching.service.MatchingService;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +37,9 @@ public class MatchingServiceImpl implements MatchingService {
 
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final KafkaTemplate<String, RideMatchedEvent> kafkaTemplate;
+    private final Counter rideRequestCounter;
+    private final Counter rideMatchedCounter;
+    private final Counter rideNoDriverCounter;
 
     @Value("${app.geo.drivers-key}")
     private String driversGeoKey;
@@ -61,10 +65,15 @@ public class MatchingServiceImpl implements MatchingService {
     public Mono<MatchResultResponse> requestRide(RideRequestDto request) {
         String rideId = UUID.randomUUID().toString();
         log.info("Ride request rideId={} riderId={}", rideId, request.getRiderId());
+        rideRequestCounter.increment();
 
         return findNearestDrivers(request.getPickupLat(), request.getPickupLng())
                 .flatMap(candidates -> {
                     if (candidates.isEmpty()) {
+                        rideNoDriverCounter.increment();
+                        // rideId included explicitly — MDC (correlationId) is lost across reactive thread boundaries
+                        log.warn("[{}] No drivers in radius rideId={} radius={}km pickup=[{},{}]",
+                                rideId, rideId, searchRadiusKm, request.getPickupLat(), request.getPickupLng());
                         return Mono.error(new NoDriverAvailableException());
                     }
                     return dispatchSequentially(rideId, request, candidates, 0);
@@ -156,6 +165,7 @@ public class MatchingServiceImpl implements MatchingService {
                 .matchedAt(Instant.now())
                 .build();
 
+        rideMatchedCounter.increment();
         return Mono.fromFuture(
                 kafkaTemplate.send(TOPIC_RIDE_MATCHED, rideId, event).toCompletableFuture()
         ).thenReturn(MatchResultResponse.builder()

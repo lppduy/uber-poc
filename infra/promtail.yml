@@ -1,0 +1,34 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: location-service
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: location-service
+          service: location-service
+          __path__: /var/log/uber/location-svc.log
+
+  - job_name: matching-service
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: matching-service
+          service: matching-service
+          __path__: /var/log/uber/matching-svc.log
+
+  - job_name: trip-service
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: trip-service
+          service: trip-service
+          __path__: /var/log/uber/trip-svc.log

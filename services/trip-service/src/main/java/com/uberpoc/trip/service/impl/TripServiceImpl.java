@@ -9,6 +9,7 @@ import com.uberpoc.trip.exception.InvalidStatusTransitionException;
 import com.uberpoc.trip.exception.TripNotFoundException;
 import com.uberpoc.trip.repository.TripRepository;
 import com.uberpoc.trip.service.TripService;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,9 @@ public class TripServiceImpl implements TripService {
     private final R2dbcEntityTemplate r2dbcEntityTemplate;
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final KafkaTemplate<String, TripStatusChangedEvent> kafkaTemplate;
+    private final Counter tripCreatedCounter;
+    private final Counter tripCompletedCounter;
+    private final Counter tripCancelledCounter;
 
     @Value("${app.redis.trip-state-ttl-seconds}")
     private long tripStateTtlSeconds;
@@ -56,7 +60,10 @@ public class TripServiceImpl implements TripService {
                 .flatMap(saved -> cacheStatus(saved.getId(), saved.getStatus())
                         .thenReturn(saved))
                 .map(TripResponse::from)
-                .doOnSuccess(t -> log.info("Trip created tripId={} status={}", t.getId(), t.getStatus()));
+                .doOnSuccess(t -> {
+                    log.info("Trip created tripId={} status={}", t.getId(), t.getStatus());
+                    tripCreatedCounter.increment();
+                });
     }
 
     @Override
@@ -87,7 +94,11 @@ public class TripServiceImpl implements TripService {
                                     .thenReturn(saved));
                 })
                 .map(TripResponse::from)
-                .doOnSuccess(t -> log.info("Trip status updated tripId={} status={}", t.getId(), t.getStatus()));
+                .doOnSuccess(t -> {
+                    log.info("Trip status updated tripId={} status={}", t.getId(), t.getStatus());
+                    if (t.getStatus() == TripStatus.COMPLETED) tripCompletedCounter.increment();
+                    if (t.getStatus() == TripStatus.CANCELLED) tripCancelledCounter.increment();
+                });
     }
 
     // ── private helpers ────────────────────────────────────────────────────

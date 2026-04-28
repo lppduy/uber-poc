@@ -1,10 +1,10 @@
 package com.uberpoc.location.service.impl;
 
-import com.uberpoc.location.domain.DriverLocation;
 import com.uberpoc.location.dto.request.UpdateLocationRequest;
 import com.uberpoc.location.dto.response.NearbyDriverResponse;
 import com.uberpoc.location.event.DriverLocationEvent;
 import com.uberpoc.location.service.LocationService;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +28,8 @@ public class LocationServiceImpl implements LocationService {
 
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final KafkaTemplate<String, DriverLocationEvent> kafkaTemplate;
+    private final Counter locationUpdateCounter;
+    private final Counter nearbyQueryCounter;
 
     @Value("${app.geo.drivers-key}")
     private String driversGeoKey;
@@ -43,12 +45,16 @@ public class LocationServiceImpl implements LocationService {
 
         return redisTemplate.opsForGeo()
                 .add(driversGeoKey, point, driverId)
-                .doOnSuccess(count -> log.debug("Updated location for driver={}", driverId))
+                .doOnSuccess(count -> {
+                    log.debug("Updated location for driver={}", driverId);
+                    locationUpdateCounter.increment();
+                })
                 .then(publishLocationEvent(driverId, request));
     }
 
     @Override
     public Flux<NearbyDriverResponse> findNearbyDrivers(double lat, double lng, double radiusKm) {
+        nearbyQueryCounter.increment();
         Circle circle = new Circle(
                 new Point(lng, lat),
                 new Distance(radiusKm, Metrics.KILOMETERS)

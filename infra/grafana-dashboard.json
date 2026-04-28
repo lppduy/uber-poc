@@ -1,0 +1,168 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "uber-poc-overview",
+    "title": "Uber POC — Service Overview",
+    "tags": ["uber-poc"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Location Updates / min",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 0, "w": 8, "h": 7 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [{
+          "expr": "rate(location_updates_total[1m]) * 60",
+          "legendFormat": "updates/min"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" },
+            "custom": { "lineWidth": 2, "fillOpacity": 10 },
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Ride Requests / min",
+        "type": "timeseries",
+        "gridPos": { "x": 8, "y": 0, "w": 8, "h": 7 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [{
+          "expr": "rate(matching_ride_requests_total[1m]) * 60",
+          "legendFormat": "requests/min"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "fixedColor": "orange", "mode": "fixed" },
+            "custom": { "lineWidth": 2, "fillOpacity": 10 },
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Match Rate",
+        "type": "timeseries",
+        "gridPos": { "x": 16, "y": 0, "w": 8, "h": 7 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [
+          { "expr": "rate(matching_ride_matched_total[1m]) * 60", "legendFormat": "matched/min" },
+          { "expr": "rate(matching_ride_no_driver_total[1m]) * 60", "legendFormat": "no_driver/min" }
+        ],
+        "fieldConfig": {
+          "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 10 } }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Total Location Updates",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 7, "w": 4, "h": 4 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [{ "expr": "location_updates_total", "legendFormat": "total" }],
+        "options": { "colorMode": "background", "graphMode": "none", "textMode": "auto" },
+        "fieldConfig": { "defaults": { "color": { "fixedColor": "blue", "mode": "fixed" } } }
+      },
+      {
+        "id": 5,
+        "title": "Total Ride Requests",
+        "type": "stat",
+        "gridPos": { "x": 4, "y": 7, "w": 4, "h": 4 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [{ "expr": "matching_ride_requests_total", "legendFormat": "total" }],
+        "options": { "colorMode": "background", "graphMode": "none" },
+        "fieldConfig": { "defaults": { "color": { "fixedColor": "orange", "mode": "fixed" } } }
+      },
+      {
+        "id": 6,
+        "title": "Total Matched",
+        "type": "stat",
+        "gridPos": { "x": 8, "y": 7, "w": 4, "h": 4 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [{ "expr": "matching_ride_matched_total", "legendFormat": "total" }],
+        "options": { "colorMode": "background", "graphMode": "none" },
+        "fieldConfig": { "defaults": { "color": { "fixedColor": "green", "mode": "fixed" } } }
+      },
+      {
+        "id": 7,
+        "title": "Trips Created",
+        "type": "stat",
+        "gridPos": { "x": 12, "y": 7, "w": 4, "h": 4 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [{ "expr": "trip_created_total", "legendFormat": "total" }],
+        "options": { "colorMode": "background", "graphMode": "none" },
+        "fieldConfig": { "defaults": { "color": { "fixedColor": "purple", "mode": "fixed" } } }
+      },
+      {
+        "id": 8,
+        "title": "Trips Completed",
+        "type": "stat",
+        "gridPos": { "x": 16, "y": 7, "w": 4, "h": 4 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [{ "expr": "trip_completed_total", "legendFormat": "total" }],
+        "options": { "colorMode": "background", "graphMode": "none" },
+        "fieldConfig": { "defaults": { "color": { "fixedColor": "green", "mode": "fixed" } } }
+      },
+      {
+        "id": 9,
+        "title": "Trips Cancelled",
+        "type": "stat",
+        "gridPos": { "x": 20, "y": 7, "w": 4, "h": 4 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [{ "expr": "trip_cancelled_total", "legendFormat": "total" }],
+        "options": { "colorMode": "background", "graphMode": "none" },
+        "fieldConfig": { "defaults": { "color": { "fixedColor": "red", "mode": "fixed" } } }
+      },
+      {
+        "id": 10,
+        "title": "JVM Heap Used — All Services",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 11, "w": 12, "h": 7 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [
+          { "expr": "jvm_memory_used_bytes{area=\"heap\",job=\"location-service\"}", "legendFormat": "location-svc heap" },
+          { "expr": "jvm_memory_used_bytes{area=\"heap\",job=\"matching-service\"}", "legendFormat": "matching-svc heap" },
+          { "expr": "jvm_memory_used_bytes{area=\"heap\",job=\"trip-service\"}", "legendFormat": "trip-svc heap" }
+        ],
+        "fieldConfig": {
+          "defaults": { "unit": "bytes", "custom": { "lineWidth": 2 } }
+        }
+      },
+      {
+        "id": 11,
+        "title": "HTTP Request Duration p99 — All Services",
+        "type": "timeseries",
+        "gridPos": { "x": 12, "y": 11, "w": 12, "h": 7 },
+        "datasource": { "type": "prometheus", "uid": "ffkevllgoomiob" },
+        "targets": [
+          { "expr": "histogram_quantile(0.99, rate(http_server_requests_seconds_bucket{job=\"location-service\"}[1m]))", "legendFormat": "location-svc p99" },
+          { "expr": "histogram_quantile(0.99, rate(http_server_requests_seconds_bucket{job=\"matching-service\"}[1m]))", "legendFormat": "matching-svc p99" },
+          { "expr": "histogram_quantile(0.99, rate(http_server_requests_seconds_bucket{job=\"trip-service\"}[1m]))", "legendFormat": "trip-svc p99" }
+        ],
+        "fieldConfig": {
+          "defaults": { "unit": "s", "custom": { "lineWidth": 2 } }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Logs — matching-service (Loki)",
+        "type": "logs",
+        "gridPos": { "x": 0, "y": 18, "w": 24, "h": 8 },
+        "datasource": { "type": "loki", "uid": "dfkevlli2mlfkf" },
+        "targets": [{
+          "expr": "{service=\"matching-service\"}",
+          "legendFormat": ""
+        }],
+        "options": { "showTime": true, "wrapLogMessage": true, "dedupStrategy": "none" }
+      }
+    ],
+    "time": { "from": "now-30m", "to": "now" }
+  },
+  "folderId": 0,
+  "overwrite": true
+}
