@@ -1,4 +1,4 @@
-# uber-poc
+# Uber PoC
 
 Ride-hailing backend POC: Java, Spring Boot, Redis GEO, Kafka, WebFlux.
 
